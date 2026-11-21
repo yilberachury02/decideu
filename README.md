@@ -56,7 +56,6 @@ This is an academic prototype. Costs, programs and support programs in `data.js`
 ## Team
 
 - Yilber Andrey Achury Hoyos
-- Jhosep Varón Mila
 
 ## References
 
