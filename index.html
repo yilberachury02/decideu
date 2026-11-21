@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DecideU – Descubre qué estudiar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand" onclick="App.go('welcome')">
+      <span class="logo">D</span><span>Decide<b>U</b></span>
+    </div>
+    <div class="steps" id="steps"></div>
+  </header>
+
+  <main id="app">
+
+    <!-- 1. Bienvenida -->
+    <section class="screen active" id="welcome">
+      <div class="hero">
+        <div class="hero-text">
+          <span class="pill">Orientación vocacional con IA</span>
+          <h1>¿No sabes qué estudiar? <span class="accent">Descúbrelo en 10 minutos.</span></h1>
+          <p>Haz un test corto y DecideU te recomienda las carreras que más van contigo, las universidades cerca de ti, cuánto cuestan y qué becas o apoyos puedes tener.</p>
+          <button class="btn primary big" onclick="App.go('register')">Empezar el test</button>
+          <div class="hero-stats">
+            <div><b>1</b><span>test</span></div>
+            <div><b>3</b><span>carreras para ti</span></div>
+            <div><b>+</b><span>becas y apoyos</span></div>
+          </div>
+        </div>
+        <div class="hero-card">
+          <div class="mini-card"><span class="emoji">🧭</span><div><b>Test vocacional</b><small>Intereses y habilidades</small></div></div>
+          <div class="mini-card"><span class="emoji">🎓</span><div><b>Tus mejores carreras</b><small>Con % de compatibilidad</small></div></div>
+          <div class="mini-card"><span class="emoji">📍</span><div><b>Universidades cerca</b><small>Según tu ubicación</small></div></div>
+          <div class="mini-card"><span class="emoji">💸</span><div><b>Becas y descuentos</b><small>Apoyos para estudiar</small></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Registro -->
+    <section class="screen" id="register">
+      <div class="card narrow">
+        <h2>Crea tu cuenta</h2>
+        <p class="muted">Así guardamos tus resultados.</p>
+        <form id="registerForm">
+          <label>Nombre<input type="text" id="name" placeholder="Tu nombre" required></label>
+          <label>Correo<input type="email" id="email" placeholder="tucorreo@gmail.com" required></label>
+          <label>Edad<input type="number" id="age" min="14" max="30" placeholder="17" required></label>
+          <label>¿En qué estás?
+            <select id="stage">
+              <option>Estoy en grado 10 u 11</option>
+              <option>Ya terminé el colegio</option>
+              <option>Empecé una carrera y quiero cambiar</option>
+            </select>
+          </label>
+          <button class="btn primary full" type="submit">Continuar</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 3. Ubicación -->
+    <section class="screen" id="location">
+      <div class="card narrow">
+        <h2>¿Dónde vives?</h2>
+        <p class="muted">Con tu ubicación te mostramos las universidades más cercanas y los apoyos de tu zona.</p>
+        <button class="btn secondary full" id="gpsBtn">📍 Usar mi ubicación actual</button>
+        <p class="or">o elige tu municipio</p>
+        <select id="townSelect"></select>
+        <p class="small muted" id="locStatus"></p>
+        <button class="btn primary full" id="locContinue">Continuar al test</button>
+      </div>
+    </section>
+
+    <!-- 4. Test -->
+    <section class="screen" id="test">
+      <div class="card narrow">
+        <div class="progress"><div class="bar" id="testBar"></div></div>
+        <p class="small muted" id="qCounter"></p>
+        <h2 id="qText"></h2>
+        <div class="answers" id="answers"></div>
+        <div class="test-nav">
+          <button class="btn ghost" id="prevQ">← Anterior</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Analizando -->
+    <section class="screen" id="loading">
+      <div class="card narrow center">
+        <div class="spinner"></div>
+        <h2>Analizando tus respuestas…</h2>
+        <p class="muted">Estamos comparando tu perfil con más de 15 carreras.</p>
+      </div>
+    </section>
+
+    <!-- 6. Resultados -->
+    <section class="screen" id="results">
+      <div class="wide">
+        <h2 id="resultsTitle"></h2>
+        <p class="muted" id="profileText"></p>
+        <div class="profile-bars" id="profileBars"></div>
+        <h3>Tus 3 carreras recomendadas</h3>
+        <div class="career-grid" id="careerGrid"></div>
+        <div class="actions">
+          <button class="btn ghost" onclick="App.restartTest()">Repetir el test</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Universidades -->
+    <section class="screen" id="universities">
+      <div class="wide">
+        <button class="btn ghost small" onclick="App.go('results')">← Volver a mis carreras</button>
+        <h2 id="uniTitle"></h2>
+        <p class="muted" id="uniSubtitle"></p>
+        <div class="uni-layout">
+          <div id="map"></div>
+          <div class="uni-list" id="uniList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. Detalle: costo y becas -->
+    <section class="screen" id="detail">
+      <div class="wide">
+        <button class="btn ghost small" onclick="App.go('universities')">← Volver a universidades</button>
+        <div id="detailContent"></div>
+      </div>
+    </section>
+
+    <!-- 9. Plan guardado -->
+    <section class="screen" id="saved">
+      <div class="card narrow center">
+        <span class="big-emoji">🎉</span>
+        <h2>¡Tu plan está listo!</h2>
+        <p class="muted">Ya no es "no sé qué estudiar". Ahora tienes un plan real.</p>
+        <div id="planSummary" class="plan"></div>
+        <button class="btn primary full" onclick="window.print()">Descargar mi plan (PDF)</button>
+        <button class="btn ghost full" onclick="App.go('results')">Ver otras opciones</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    DecideU · Prototipo académico – UNICOC · Los costos y apoyos son datos de demostración: verifícalos en la página oficial de cada institución.
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
